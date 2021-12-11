@@ -1,0 +1,286 @@
+---
+title: "SP group project renewal  process"
+output: word_document
+---
+
+```{r}
+#(a)
+#for uniform distribution 
+set.seed(345)
+draws <- runif(20)
+draws
+```
+
+Drawing a random sample of n=20 from U(0,1)
+
+```{r}
+find_n <- function(u) {
+  which(cumsum(u) > 1)[1]  # which partial sum first exceeds 1?
+}
+
+n <- find_n(draws)
+draws[1:n]
+```
+We have defined a function to check which partial sum exceeds 1 with the help of cumsum
+After that we have shown result for which set of RV's the cumulative sum is exceeding 1
+
+```{r}
+sample_from_N <- function(m)
+{
+  draws <- matrix(runif(m * 20), ncol = 20)
+  n.many <- apply(draws, 1, find_n)
+  estimated.probs <- table(factor(n.many, levels = 2:10)) / m  
+  return(estimated.probs)
+}
+m <- 1000
+approx.N <- sample_from_N(1000)  # approximate prob. dist'n of N
+approx.N
+
+```
+
+From the table we can see that the probability associated with each RV's sum is given, i.e., The probability for the RV's to cross a sum of 2 is equal to 0.489 and so on for every cumulative sum
+
+
+```{r}
+#for log-normal N(0,1)
+set.seed(65)
+draws <- rlnorm(20)
+draws
+```
+
+Drawing a random sample of n=20 from Log-normal(0,1)
+
+```{r}
+find_n <- function(u) {
+  which(cumsum(u) >= 1)[1]  # which partial sum first exceeds 1?
+}
+
+n <- find_n(draws)
+draws[1:n]
+```
+We have defined a function to check which partial sum exceeds 1 with the help of cumsum
+After that we have shown result for which set of RV's the cumulative sum is exceeding 1
+
+```{r}
+sample_from_N <- function(m)
+{
+  draws <- matrix(rlnorm(m * 20), ncol = 20)
+  n.many <- apply(draws, 1, find_n)
+  estimated.probs <- table(factor(n.many, levels = 1:10)) / m  
+  return(estimated.probs)
+}
+m <- 1000
+approx.N <- sample_from_N(1000)  # approximate prob. dist'n of N
+approx.N
+```
+From the table we can see that the probability associated with each RV's sum is given, i.e., The probability for the RV's to cross a sum of 1 is equal to 0.504 and so on for every cumulative sum.
+
+```{r}
+#(b)
+time=readline(prompt = "Enter any time between 2 buses =")
+```
+
+Using the readline function to read a line from the terminal , i.e. prompting the user for input.
+
+```{r}
+t1=c(0,time)
+print(paste("The expected time for next bus to come is",mean(as.numeric(t1)),"mins"))
+```
+Setting the range for time and then calculating the mean to get the expected time for arrival for the next bus (this is the wrong inter-arrival time).
+
+```{r}
+#Using Inspection paradox
+#Assuming 5 buses to come in first "time" mins and we do it for an hour(60 mins)
+t2=readline(prompt = "What is the time interval you want the buses to come in your given time between 2 buses\n")
+c1=as.numeric(t2)
+inter=c(c1,c1,c1,c1,c1,(60-as.numeric(time)))
+avgarrival_time_between_buses=mean(inter)
+avgarrival_time_between_buses
+```
+In the similar manner, we have assumed 5 buses to come in first "t" mins and then we do it for an hour . The average arrival time between buses comes out to be 8.333 mins. 
+
+```{r}
+#using the inspection paradox formula
+avgtime_wait=mean(as.numeric(t1)*((c1/60)*(c1/2))+((60-as.numeric(time))/60)*(60-as.numeric(time))/2)
+avgtime_wait
+```
+Using the inspection paradox formula , the actual waiting time for the arrival of 2 buses is equal to 13.667 which is the actual waiting time unlike 8.333
+
+```{r}
+#(c)
+#for U(0,1)
+ren.process <- function(a,b,n){
+  s<-numeric(n+1)
+  # set S_0 = 0
+  s[1] <-0
+  # generate vector of iid Uniform random variables:
+  set.seed(45)
+  x <-replicate(n,runif(1,a,b))
+  # assign wait time to vector s in for loop:
+  for (k in 1:n){
+    
+    s[k+1] <-sum(x[1:k])
+    
+  }
+  # return vector of wait time
+  return(s)
+}
+```
+
+First, we initialize the vector of total wait time for the arrival of each event then we set the vector s as 0. Now we generate a vectors of iid uniform U(0,1) random variables to make this process a renewal process.
+
+```{r}
+a<-0
+b<-1
+#For uniform U(0,1)
+s_list1 <-ren.process(a,b,20)
+s_list1
+s_list2 <-ren.process(a,b,50)
+s_list2
+s_list3 <-ren.process(a,b,100)
+s_list3
+s_list4 <-ren.process(a,b,1000)
+s_list4
+s_list5 <-ren.process(a,b,10000)
+s_list5
+```
+
+```{r}
+#for N(5,9)
+ren.process1 <- function(a1,b1,n){
+  
+  # initialize vector of total wait time for the arrival of each event:
+  s<-numeric(n+1)
+  # set S_0 = 0
+  s[1] <-0
+  # generate vector of iid Normal random variables:
+   set.seed(135)
+  x <-replicate(n,rnorm(1,a1,b1))
+  # assign wait time to vector s in for loop:
+  for (k in 1:n){
+    
+    s[k+1] <-sum(x[1:k])
+    
+  }
+  # return vector of wait time
+  return(s)
+  
+}
+a1<-5
+b1<-9
+#For normal N(5,9)
+s_list6 <-ren.process1(a1,b1,20)
+s_list6
+s_list7 <-ren.process1(a1,b1,50)
+s_list7
+s_list8 <-ren.process1(a1,b1,100)
+s_list8
+s_list9 <-ren.process1(a1,b1,1000)
+s_list9
+s_list10 <-ren.process1(a1,b1,10000)
+s_list10
+```
+
+```{r}
+#(d)
+#for U(0,1)
+par(mfrow=c(3,2))
+plot(stepfun(0:(20-1), s_list1), 
+     do.points = TRUE,
+     pch = 16,
+     col.points = "red",
+     verticals = FALSE,
+     main = 'Realization of a Renewal process with parameters of Uniform distribution',
+     xlab = 'Time of arrival',
+     ylab = 'Number of arrivals')
+plot(stepfun(0:(50-1), s_list2), 
+     do.points = TRUE,
+     pch = 16,
+     col.points = "red",
+     verticals = FALSE,
+     main = 'Realization of a Renewal process with parameters of Uniform distribution',
+     xlab = 'Time of arrival',
+     ylab = 'Number of arrivals')
+plot(stepfun(0:(100-1), s_list3), 
+     do.points = TRUE,
+     pch = 16,
+     col.points = "red",
+     verticals = FALSE,
+     main = 'Realization of a Renewal process with parameters of Uniform distribution',
+     xlab = 'Time of arrival',
+     ylab = 'Number of arrivals')
+plot(stepfun(0:(1000-1), s_list4), 
+     do.points = TRUE,
+     pch = 16,
+     col.points = "red",
+     verticals = FALSE,
+     main = 'Realization of a Renewal process with parameters of Uniform distribution',
+     xlab = 'Time of arrival',
+     ylab = 'Number of arrivals')
+plot(stepfun(0:(10000-1), s_list5), 
+     do.points = TRUE,
+     pch = 16,
+     col.points = "red",
+     verticals = FALSE,
+     main = 'Realization of a Renewal process with parameters of Uniform distribution',
+     xlab = 'Time of arrival',
+     ylab = 'Number of arrivals')
+
+
+```
+
+```{r}
+#for N(5,9)
+par(mfrow=c(3,2))
+plot(stepfun(0:(20-1), s_list6), 
+     do.points = TRUE,
+     pch = 16,
+     col.points = "red",
+     verticals = FALSE,
+     main = 'Realization of a Renewal process with parameters of Normal distribution',
+     xlab = 'Time of arrival',
+     ylab = 'Number of arrivals')
+plot(stepfun(0:(50-1), s_list7), 
+     do.points = TRUE,
+     pch = 16,
+     col.points = "red",
+     verticals = FALSE,
+     main = 'Realization of a Renewal process with parameters of Normal distribution',
+     xlab = 'Time of arrival',
+     ylab = 'Number of arrivals')
+plot(stepfun(0:(100-1), s_list8), 
+     do.points = TRUE,
+     pch = 16,
+     col.points = "red",
+     verticals = FALSE,
+     main = 'Realization of a Renewal process with parameters of Normal distribution',
+     xlab = 'Time of arrival',
+     ylab = 'Number of arrivals')
+plot(stepfun(0:(1000-1), s_list9), 
+     do.points = TRUE,
+     pch = 16,
+     col.points = "red",
+     verticals = FALSE,
+     main = 'Realization of a Renewal process with parameters of Normal distribution',
+     xlab = 'Time of arrival',
+     ylab = 'Number of arrivals')
+plot(stepfun(0:(10000-1), s_list10), 
+     do.points = TRUE,
+     pch = 16,
+     col.points = "red",
+     verticals = FALSE,
+     main = 'Realization of a Renewal process with parameters of Normal distribution',
+     xlab = 'Time of arrival',
+     ylab = 'Number of arrivals')
+```
+
+
+
+
+
+
+
+
+
+
+
